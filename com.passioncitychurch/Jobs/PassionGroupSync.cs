@@ -316,34 +316,33 @@ namespace com.passioncitychurch.Jobs
                                         }
                                     }
 
-                                    // If the Group has a welcome email, and person has an email address, send them the welcome email and possibly create a login
-                                    if ( sync.WelcomeSystemCommunication != null )
+                                    // If the person has an email address, possibly create a login
+                                    var person = new PersonService( groupMemberContext ).Get( personId );
+                                    if ( person.CanReceiveEmail( false ) )
                                     {
-                                        var person = new PersonService( groupMemberContext ).Get( personId );
-                                        if ( person.CanReceiveEmail( false ) )
+                                        // If the group is configured to add a user account for anyone added to the group, and person does not yet have an
+                                        // account, add one for them.
+                                        string newPassword = string.Empty;
+                                        bool createLogin = sync.AddUserAccountsDuringSync;
+
+                                        // Only create a login if requested, no logins exist and we have enough information to generate a user name.
+                                        if ( createLogin && !person.Users.Any() && !string.IsNullOrWhiteSpace( person.NickName ) && !string.IsNullOrWhiteSpace( person.LastName ) )
                                         {
-                                            // If the group is configured to add a user account for anyone added to the group, and person does not yet have an
-                                            // account, add one for them.
-                                            string newPassword = string.Empty;
-                                            bool createLogin = sync.AddUserAccountsDuringSync;
+                                            newPassword = System.Web.Security.Membership.GeneratePassword( 9, 1 );
+                                            string username = Rock.Security.Authentication.Database.GenerateUsername( person.Email.Substring(0,1), person.Email.Substring(1,person.Email.Length - 1) );
 
-                                            // Only create a login if requested, no logins exist and we have enough information to generate a user name.
-                                            if ( createLogin && !person.Users.Any() && !string.IsNullOrWhiteSpace( person.NickName ) && !string.IsNullOrWhiteSpace( person.LastName ) )
-                                            {
-                                                newPassword = System.Web.Security.Membership.GeneratePassword( 9, 1 );
-                                                string username = Rock.Security.Authentication.Database.GenerateUsername( person.Email.Substring(0,1), person.Email.Substring(1,person.Email.Length - 1) );
-
-                                                UserLogin login = UserLoginService.Create(
-                                                    groupMemberContext,
-                                                    person,
-                                                    AuthenticationServiceType.Internal,
-                                                    EntityTypeCache.Get( Rock.SystemGuid.EntityType.AUTHENTICATION_DATABASE.AsGuid() ).Id,
-                                                    username,
-                                                    newPassword,
-                                                    true,
-                                                    requirePasswordReset );
-                                            }
-
+                                            UserLogin login = UserLoginService.Create(
+                                                groupMemberContext,
+                                                person,
+                                                AuthenticationServiceType.Internal,
+                                                EntityTypeCache.Get( Rock.SystemGuid.EntityType.AUTHENTICATION_DATABASE.AsGuid() ).Id,
+                                                username,
+                                                newPassword,
+                                                true,
+                                                requirePasswordReset );
+                                        }
+                                        if (sync.WelcomeSystemCommunication != null)
+                                        {
                                             // Send the welcome email
                                             var mergeFields = new Dictionary<string, object>();
                                             mergeFields.Add( "Group", sync.Group );
