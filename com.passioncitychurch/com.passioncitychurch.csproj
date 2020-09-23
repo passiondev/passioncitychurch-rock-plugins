@@ -61,6 +61,8 @@
     <Compile Include="Badge\Component\TopPersonSignalPassion.cs" />
     <Compile Include="Jobs\PassionGroupSync.cs" />
     <Compile Include="Model\AttendanceSerivce.cs" />
+    <Compile Include="Web\UI\Controls\DynamicPersonRegistration\DynamicPersons.cs" />
+    <Compile Include="Web\UI\Controls\DynamicPersonRegistration\DynamicPersonRow.cs" />
     <Compile Include="Web\UI\Controls\PreRegistration\PassionChildren.cs" />
     <Compile Include="Web\UI\Controls\PreRegistration\PassionChildRow.cs" />
     <Compile Include="Web\UI\Controls\PreRegistration\PassionStudentRow.cs" />
