@@ -481,7 +481,8 @@ ORDER BY [Text]", false, "", "Child Relationship", 2, "CanCheckinRelationships" 
                 else
                 {
                     // Otherwise, create a new family and save it
-                    primaryFamily = CreateNewFamily( familyGroupType.Id, tbFirstName1.Text + " " + tbLastName1.Text, parentGroupId );
+                    var posessiveFullName = tbLastName1.Text.EndsWith("s") ? tbFirstName1.Text + " " + tbLastName1.Text + "'" : tbFirstName1.Text + " " + tbLastName1.Text + "'s";
+                    primaryFamily = CreateNewFamily(familyGroupType.Id, posessiveFullName, parentGroupId);
                     groupService.Add( primaryFamily );
                     saveEmptyValues = true;
                 }
@@ -592,10 +593,10 @@ ORDER BY [Text]", false, "", "Child Relationship", 2, "CanCheckinRelationships" 
                     //}
 
                     // If person was not found, Look for existing person in same family with same name and email
-                    if ( person == null && child.EmailAddress.IsNullOrWhiteSpace() )
+                    if ( person == null && !child.EmailAddress.IsNullOrWhiteSpace() )
                     {
                         var possibleMatch = new Person { NickName = child.NickName, LastName = child.LastName, Email = child.EmailAddress };
-                        var personQuery = new PersonService.PersonMatchQuery( possibleMatch.FirstName.Trim(), possibleMatch.LastName.Trim(), possibleMatch.Email.Trim(), string.Empty );
+                        var personQuery = new PersonService.PersonMatchQuery( possibleMatch.NickName.Trim(), possibleMatch.LastName.Trim(), possibleMatch.Email.Trim(), string.Empty );
                         var matchPerson = personService.FindPerson(personQuery, true);
 
                         if (matchPerson != null)
@@ -907,6 +908,10 @@ ORDER BY [Text]", false, "", "Child Relationship", 2, "CanCheckinRelationships" 
             isRequired = SetControl( ADULT_MOBILE_KEY, pnlMobilePhone1, pnlMobilePhone2 );
             pnMobilePhone1.Required = isRequired;
             hfMobilePhoneRequired.Value = isRequired.ToStringSafe();
+
+            // Make Primary Name Requireed
+            tbFirstName1.Required = true;
+            tbLastName1.Required = true;
 
             //// Check for Current Family
             SetCurrentFamilyValues();
